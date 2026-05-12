@@ -1,8 +1,22 @@
-import ollama
+import os
 import json
 from pydantic import BaseModel, Field
 
+# ── Mode detection ────────────────────────────────────────────────────────────
+GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
+USE_GEMINI = bool(GOOGLE_API_KEY)
 
+if USE_GEMINI:
+    import google.generativeai as genai
+    genai.configure(api_key=GOOGLE_API_KEY)
+    model = genai.GenerativeModel("gemini-1.5-flash")
+    print("LLM mode: Gemini 1.5 Flash (cloud)")
+else:
+    import ollama
+    print("LLM mode: Mistral (local Ollama)")
+
+
+# ── Pydantic models ───────────────────────────────────────────────────────────
 class FieldConfidence(BaseModel):
     supplier_name: float = Field(default=0.0)
     invoice_number: float = Field(default=0.0)
@@ -27,6 +41,7 @@ class InvoiceData(BaseModel):
     notes: str = Field(default="")
 
 
+# ── Prompt ────────────────────────────────────────────────────────────────────
 SYSTEM_PROMPT = """You are a UK accounting assistant specialising in invoice data extraction.
 Extract invoice data and return ONLY valid JSON with no extra text, no markdown, no code blocks.
 
@@ -69,54 +84,17 @@ Field confidence scoring guide:
 Never guess amounts. If a total is unclear, set it to 0 and score total_amount confidence as 0.0."""
 
 
+# ── Extraction ────────────────────────────────────────────────────────────────
 def extract_invoice_data(text: str) -> tuple[InvoiceData, bool]:
-    """
-    Send extracted text to Mistral, get back structured invoice data.
-    Returns (InvoiceData, success_boolean)
-    """
     try:
-        response = ollama.chat(
-            model="mistral",
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": f"Extract invoice data from this text:\n\n{text}"}
-            ],
-            options={"temperature": 0}
-        )
+        if USE_GEMINI:
+            raw = _call_gemini(text)
+        else:
+            raw = _call_ollama(text)
 
-        raw = response["message"]["content"].strip()
-
-        # Clean up common LLM formatting issues
-        if "```" in raw:
-            parts = raw.split("```")
-            raw = parts[1] if len(parts) > 1 else parts[0]
-            if raw.startswith("json"):
-                raw = raw[4:]
-        raw = raw.strip()
-
+        raw = _clean_raw(raw)
         data = json.loads(raw)
-
-        # Fix: if confidence is a dict (LLM confused it with field_confidence), extract or default
-        if isinstance(data.get("confidence"), dict):
-            # LLM put field scores in confidence — move them to field_confidence
-            if not data.get("field_confidence"):
-                data["field_confidence"] = data["confidence"]
-            data["confidence"] = sum(data["field_confidence"].values()) / len(data["field_confidence"])
-
-        # Fix: if field_confidence is missing, build it from overall confidence
-        if not data.get("field_confidence"):
-            overall = float(data.get("confidence", 0.8))
-            data["field_confidence"] = {
-                "supplier_name": overall,
-                "invoice_number": overall,
-                "invoice_date": overall,
-                "total_amount": overall,
-                "vat_amount": overall,
-                "vat_rate": overall,
-            }
-
-        # Ensure confidence is always a plain float
-        data["confidence"] = float(data.get("confidence", 0.8))
+        data = _fix_confidence(data)
 
         invoice = InvoiceData(**data)
         return invoice, True
@@ -134,3 +112,53 @@ def extract_invoice_data(text: str) -> tuple[InvoiceData, bool]:
             notes=f"LLM error: {str(e)}",
             reasoning="Extraction failed — unexpected error"
         ), False
+
+
+def _call_gemini(text: str) -> str:
+    prompt = f"{SYSTEM_PROMPT}\n\nExtract invoice data from this text:\n\n{text}"
+    response = model.generate_content(prompt)
+    return response.text.strip()
+
+
+def _call_ollama(text: str) -> str:
+    response = ollama.chat(
+        model="mistral",
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": f"Extract invoice data from this text:\n\n{text}"}
+        ],
+        options={"temperature": 0}
+    )
+    return response["message"]["content"].strip()
+
+
+def _clean_raw(raw: str) -> str:
+    if "```" in raw:
+        parts = raw.split("```")
+        raw = parts[1] if len(parts) > 1 else parts[0]
+        if raw.startswith("json"):
+            raw = raw[4:]
+    return raw.strip()
+
+
+def _fix_confidence(data: dict) -> dict:
+    # If LLM confused confidence with field_confidence
+    if isinstance(data.get("confidence"), dict):
+        if not data.get("field_confidence"):
+            data["field_confidence"] = data["confidence"]
+        data["confidence"] = sum(data["field_confidence"].values()) / len(data["field_confidence"])
+
+    # If field_confidence is missing entirely
+    if not data.get("field_confidence"):
+        overall = float(data.get("confidence", 0.8))
+        data["field_confidence"] = {
+            "supplier_name": overall,
+            "invoice_number": overall,
+            "invoice_date": overall,
+            "total_amount": overall,
+            "vat_amount": overall,
+            "vat_rate": overall,
+        }
+
+    data["confidence"] = float(data.get("confidence", 0.8))
+    return data

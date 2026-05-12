@@ -3,7 +3,7 @@ import json
 import os
 from datetime import datetime
 
-DB_PATH = "audit.db"
+DB_PATH = os.path.join(os.environ.get("TMPDIR", "/tmp"), "audit.db")
 
 
 def init_db():

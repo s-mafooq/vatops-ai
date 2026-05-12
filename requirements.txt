@@ -7,10 +7,9 @@ pillow
 pydantic
 rapidfuzz
 pandas
-ollama
 sqlalchemy
 openpyxl
 xlrd
-groq
+google-generativeai
 jinja2
 aiofiles
