@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VatOps AI — UK MTD Invoice Processing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --blue: #2d6ada;
+    --orange: #f08030;
+    --white: #ffffff;
+    --bg: #080808;
+    --text-muted: rgba(255, 255, 255, 0.822);
+    --text-dim: rgba(240, 182, 182, 0.45);
+    --border: rgba(255,255,255,0.07);
+    --surface: rgba(255,255,255,0.03);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--bg);
+    color: var(--white);
+    overflow-x: hidden;
+    line-height: 1.6;
+}
+.orb {
+    position: fixed; border-radius: 50%;
+    pointer-events: none; z-index: 0;
+    animation: orbdrift 14s ease-in-out infinite alternate;
+}
+.orb-1 {
+    width: 700px; height: 700px;
+    background: radial-gradient(circle, rgba(245,200,66,0.07) 0%, transparent 70%);
+    top: -200px; right: -100px;
+}
+.orb-2 {
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(80,160,255,0.04) 0%, transparent 70%);
+    bottom: -150px; left: -100px;
+    animation-delay: 6s; animation-direction: alternate-reverse;
+}
+@keyframes orbdrift {
+    from { transform: translate(0,0) scale(1); }
+    to   { transform: translate(25px,15px) scale(1.04); }
+}
+
+/* Navbar */
+nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 999;
+    height: 60px;
+    display: flex; align-items: center;
+    padding: 0 4rem;
+    background: rgba(8, 8, 8, 0.267);
+    backdrop-filter: blur(28px);
+    border-bottom: 1px solid var(--border);
+}
+.nav-logo {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.05rem; font-weight: 800;
+    color: var(--white); text-decoration: none;
+    letter-spacing: -0.02em;
+}
+.nav-links {
+    display: flex; gap: 2.5rem;
+    margin-left: 3rem;
+    list-style: none;
+}
+.nav-links a {
+    font-size: 0.82rem; color: var(--text-muted);
+    text-decoration: none; transition: color 0.2s;
+    position: relative;
+}
+.nav-links a:hover { color: var(--white); }
+.nav-cta {
+    margin-left: auto;
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: 'Montserrat', sans-serif;
+    color: var(--white); text-decoration: none;
+    font-size: 0.82rem; font-weight: 500;
+    background: linear-gradient(135deg, var(--blue), var(--orange));
+    border: none; border-radius: 8px;
+    padding: 8px 20px; cursor: pointer;
+    transition: background 0.18s, transform 0.15s;
+    text-decoration: none;
+}
+.nav-cta:hover { background: var(--blue); transform: translateY(-1px); }
+
+body {
+    background-color: #0b0f1a;
+    background-image:
+        linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(
+        circle at 50% 50%,
+        rgba(255, 200, 100, 0.08),
+        transparent 40%
+    );
+    pointer-events: none;
+}
+
+@keyframes moveGrid {
+    from {
+        background-position: 0 0, 0 0;
+    }
+    to {
+        background-position: 50px 50px, 50px 50px;
+    }
+}
+
+.trust {
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.35);
+    margin-top: 8px;
+}
+
+/* Hero */
+.hero {
+    position: relative; z-index: 1;
+    min-height: 85vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    padding: 100px 2rem 60px;
+    max-width: 900px; margin: 0 auto;
+}
+
+body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(
+        600px circle at var(--x, 50%) var(--y, 50%),
+        rgba(255,255,255,0.06),
+        transparent 40%
+    );
+    pointer-events: none;
+    z-index: 0;
+}
+
+.badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 0.68rem; font-weight: 600;
+    color: var(--blue); text-transform: uppercase; letter-spacing: 0.12em;
+    background: rgba(245,200,66,0.08);
+    border: 1px solid rgba(245,200,66,0.22);
+    padding: 5px 14px; border-radius: 999px;
+    margin-bottom: 1.5rem;
+    animation: fadeup 0.5s ease both;
+}
+.badge-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--blue);
+    animation: pulse 2s ease infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+h1 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(1rem, 6vw, 2rem);
+    font-weight: 800; line-height: 1.5;
+    letter-spacing: 0.035em;
+    margin-bottom: 1.25rem;
+    animation: fadeup 0.5s 0.08s ease both;
+}
+h1 .muted { color: rgba(173, 169, 169, 0.795); }
+h1 em {
+    font-style: normal;
+    background: linear-gradient(90deg, var(--blue) 0%, var(--orange) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.sub {
+    font-size: 1rem; font-weight: 300; line-height: 1.75;
+    color: rgba(255, 255, 255, 0.836);
+    max-width: 500px; margin: 0 auto 2rem;
+    animation: fadeup 0.5s 0.14s ease both;
+}
+
+.cta-wrap {
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    margin-bottom: 2.5rem;
+    animation: fadeup 0.5s 0.2s ease both;
+}
+.cta-btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem; font-weight: 600;
+    background: linear-gradient(135deg, var(--blue), var(--orange));
+    color: #ffffff; border: none; border-radius: 12px;
+    padding: 15px 36px; cursor: pointer;
+    transition: transform 0.18s, box-shadow 0.18s;
+    text-decoration: none;
+}
+.cta-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 40px rgba(245,200,66,0.28);
+}
+.cta-hint {
+    font-size: 0.73rem;
+    color: rgba(255, 255, 255, 0.767);
+    letter-spacing: 0.03em;
+}
+
+/* Metrics */
+.metrics {
+    display: flex; gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 14px; overflow: hidden;
+    max-width: 540px; width: 100%;
+    animation: fadeup 0.5s 0.28s ease both;
+}
+.metric {
+    flex: 1; padding: 1rem 0.5rem; text-align: center;
+    border-right: 1px solid var(--border);
+    background: var(--surface);
+}
+.metric:last-child { border-right: none; }
+.metric-val {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.35rem; font-weight: 700;
+    letter-spacing: -0.025em; line-height: 1;
+}
+.metric-lbl {
+    font-size: 0.6rem; color: rgba(255,255,255,0.45);
+    text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px;
+}
+
+@keyframes fadeup {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Preview card */
+.preview-wrap {
+    position: relative; z-index: 1;
+    max-width: 700px; margin: 0 auto;
+    padding: 0 2rem 6rem;
+    animation: fadeup 0.5s 0.34s ease both;
+}
+.preview {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 18px; overflow: hidden;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+}
+.preview-bar {
+    background: rgba(255,255,255,0.03);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    padding: 12px 16px;
+    display: flex; align-items: center; gap: 8px;
+}
+.win-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.preview-title { font-size: 0.7rem; color: rgba(255,255,255,0.25); margin-left: 6px; }
+.preview-pill {
+    margin-left: auto; font-size: 0.6rem; font-weight: 600;
+    background: rgba(22,163,74,0.15); color: #4ade80;
+    border: 1px solid rgba(74,222,128,0.18);
+    padding: 2px 8px; border-radius: 999px;
+}
+.preview-body { padding: 1.25rem 1.25rem 0.5rem; }
+.preview-head {
+    display: grid; grid-template-columns: 1fr auto auto; gap: 1rem;
+    font-size: 0.6rem; color: rgba(255,255,255,0.18);
+    text-transform: uppercase; letter-spacing: 0.1em;
+    padding: 0 0.75rem 0.75rem;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    margin-bottom: 0.5rem;
+}
+.inv-row {
+    display: grid; grid-template-columns: 1fr auto auto; gap: 1rem;
+    align-items: center; padding: 10px 12px;
+    border-radius: 8px; margin-bottom: 4px;
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.045);
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeInRow 0.5s ease forwards;
+}
+.inv-name { font-size: 0.78rem; color: rgba(255,255,255,0.75); font-weight: 500; }
+.inv-date { font-size: 0.66rem; color: rgba(255,255,255,0.28); margin-top: 2px; }
+.inv-amt { font-family: 'Montserrat', sans-serif; font-size: 0.85rem; font-weight: 700; text-align: right; }
+.inv-vat { font-size: 0.62rem; color: rgba(255,255,255,0.28); text-align: right; margin-top: 2px; }
+.inv-badge { font-size: 0.62rem; font-weight: 600; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+.inv-row:nth-child(1) { animation-delay: 0.2s; }
+.inv-row:nth-child(2) { animation-delay: 0.4s; }
+.inv-row:nth-child(3) { animation-delay: 0.6s; }
+.inv-row:nth-child(4) { animation-delay: 0.8s; }
+
+@keyframes fadeInRow {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.b-green { background: rgba(22,163,74,0.15); color: #4ade80; border: 1px solid rgba(74,222,128,0.18); }
+.b-amber { background: rgba(217,119,6,0.15); color: #fbbf24; border: 1px solid rgba(251,191,36,0.18); }
+.b-red   { background: rgba(220,38,38,0.15); color: #f87171; border: 1px solid rgba(248,113,113,0.18); }
+.preview-stats {
+    display: grid; grid-template-columns: repeat(4,1fr);
+    border-top: 1px solid rgba(255,255,255,0.06);
+    margin-top: 0.75rem;
+}
+.ps-item { padding: 12px 8px; text-align: center; border-right: 1px solid rgba(255,255,255,0.05); }
+.ps-item:last-child { border-right: none; }
+.ps-val { font-family: 'Montserrat', sans-serif; font-size: 0.95rem; font-weight: 700; }
+.ps-lbl { font-size: 0.58rem; color: rgba(255,255,255,0.28); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+
+/* Section shared */
+section { position: relative; z-index: 1; }
+
+.sec-eyebrow {
+    font-size: 0.65rem; color: rgba(255, 255, 255, 0.925);
+    letter-spacing: 0.16em;
+    margin-bottom: 0.75rem; display: block;
+    font-size: medium; font-weight: 500;
+}
+.sec-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    font-weight: 700; letter-spacing: -0.025em;
+    line-height: 1.1; margin-bottom: 3rem;
+}
+
+/* Features */
+.features-section {
+    border-top: 1px solid var(--border);
+    background: rgba(255,255,255,0.015);
+    padding: 6rem 4rem;
+}
+.features-inner {
+    max-width: 1100px; margin: 0 auto;
+    text-align: center;
+}
+.features-grid {
+    display: grid; grid-template-columns: repeat(3,1fr);
+    gap: 1.5rem; margin-top: 0;
+}
+.feat {
+    padding: 1.75rem; text-align: left;
+    border: 1px solid rgba(255,255,255,0.055);
+    border-radius: 14px;
+    background: rgba(255,255,255,0.02);
+    transition: border-color 0.25s, background 0.25s;
+}
+.feat:hover {
+    border-color: rgba(245,200,66,0.2);
+    background: rgba(245,200,66,0.025);
+}
+.feat-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.9rem; font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+.feat-desc { font-size: 0.78rem; color: rgba(255, 255, 255, 0.932); line-height: 1.7; }
+.feat-tag {
+    font-size: 0.62rem; font-weight: 600; color: var(--blue);
+    text-transform: uppercase; letter-spacing: 0.1em;
+    margin-top: 1rem; display: block;
+}
+
+/* Steps */
+.steps-section {
+    padding: 6rem 4rem;
+    max-width: 1100px; margin: 0 auto;
+}
+.steps-grid {
+    display: grid; grid-template-columns: repeat(4,1fr);
+    gap: 1.5px;
+    background: rgba(255,255,255,0.045);
+    border-radius: 16px; overflow: hidden;
+}
+.step {
+    background: #0d0d0d; padding: 2rem 1.5rem;
+}
+.step-n {
+    font-size: 1.25rem; font-weight: 700;
+    color: rgb(255, 255, 255);
+    letter-spacing: 0.16em; text-transform: uppercase;
+    margin-bottom: 1.25rem;
+}
+.step-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.88rem; font-weight: 700;
+    margin-bottom: 0.4rem;
+}
+.step-desc { font-size: 0.75rem; color: rgba(255, 255, 255, 0.945); line-height: 1.65; }
+
+/* Bottom CTA */
+.cta-section {
+    margin: 0 4rem 6rem;
+    border-radius: 22px;
+    background: linear-gradient(135deg, rgba(245,200,66,0.08), rgba(240,128,48,0.04));
+    border: 1px solid rgba(245,200,66,0.14);
+    padding: 5rem 2rem; text-align: center;
+    position: relative; z-index: 1; overflow: hidden;
+}
+.cta-section::before {
+    content: '';
+    position: absolute; top: -80px; left: 50%; transform: translateX(-50%);
+    width: 400px; height: 400px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(245,200,66,0.06) 0%, transparent 70%);
+    pointer-events: none;
+}
+.cta-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+    font-weight: 800; letter-spacing: -0.03em;
+    margin-bottom: 0.75rem; position: relative;
+}
+.cta-sub {
+    font-size: 0.88rem; color: rgba(255, 255, 255, 0.815);
+    margin-bottom: 2.5rem; font-weight: 300; position: relative;
+}
+
+/* Footer */
+footer {
+    border-top: 1px solid var(--border);
+    padding: 1.75rem 4rem;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 1rem; color: rgba(255, 255, 255, 0.925);
+    position: relative; z-index: 1;
+    margin-left: 50%; transform: translateX(-50%);
+}
+.footer-links { display: flex; gap: 2rem; }
+.footer-links a { color: rgb(255, 255, 255); text-decoration: none; transition: color 0.2s; }
+.footer-links a:hover { color: var(--white); }
+
+.feat {
+    transition: transform 0.25s ease, border-color 0.25s;
+}
+
+.feat:hover {
+    transform: translateY(-6px);
+}
+
+.inv-row {
+    transition: transform 0.2s ease, background 0.2s;
+}
+
+.inv-row:hover {
+    transform: scale(1.02);
+    background: rgba(255,255,255,0.05);
+}
+
+.pain-strip {
+    display: flex;
+    gap: 1.5rem;
+    font-weight: 400;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    font-size: 1rem;
+    color: rgb(255, 255, 255);
+    margin: 2rem 0;
+}
+
+.pain-strip .solution {
+    color: #f5c842;
+    font-weight: 600;
+}
+
+.trust {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.925);
+    margin-top: 10px;
+    text-align: center;
+}
+
+.hidden {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s ease;
+}
+
+.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+/* Remove gap above topbar */
+.main .block-container {
+    padding-top: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-bottom: 0 !important;
+}
+/* Fix content area background bleeding */
+.app-content {
+    html, body, [class*="css"] {
+    font-family: 'DM Sans', sans-serif;
+    background: #f7f6f3;
+    color: #0f0f0f;
+}
+}
+/* Nav buttons row — remove Streamlit column gaps */
+[data-testid="stHorizontalBlock"] {
+    gap: 0.5rem !important;
+    padding: 0.5rem 1rem !important;
+    background: rgba(247,246,243,0.95) !important;
+    border-bottom: 1px solid rgba(0,0,0,0.06) !important;
+}
+
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+    <a class="nav-logo" href="#"><span style="color:#f5c842">●</span> VatOps AI</a>
+    <ul class="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#how">How it works</a></li>
+    </ul>
+    <a class="nav-cta" href="/app?go=start">Get Started &rarr;</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+    <div class="badge">
+        <span class="badge-dot"></span>
+        HMRC MTD Compliant &middot; 2026
+    </div>
+    <h1>
+        Automate VAT & invoices.<br>
+        <span class="muted">From upload to MTD-ready</span>
+        <em> in SECONDS.</em>
+    </h1>
+    <p class="sub">
+        Drop your invoices. VatOps AI extracts every field,
+        classifies UK VAT, matches bank transactions, and
+        delivers MTD-ready records, in seconds. All on your machine, with a full audit trail.
+    </p>
+    <div class="cta-wrap">
+        <a class="cta-btn" href="http://localhost:8000/app?go=start">
+            Process Your First Invoice
+        </a>
+        <span class="cta-hint">No account needed &middot; Runs locally &middot; Data never leaves your machine</span>
+    </div>
+    <div class="trust">
+        Used for UK MTD workflows · Built for finance teams · Runs locally
+    </div>
+
+    <div class="metrics">
+        <div class="metric"><div class="metric-val">80%</div><div class="metric-lbl">Time saved</div></div>
+        <div class="metric"><div class="metric-val">92%</div><div class="metric-lbl">Accuracy</div></div>
+        <div class="metric"><div class="metric-val">&lt;60s</div><div class="metric-lbl">Per batch</div></div>
+        <div class="metric"><div class="metric-val">100%</div><div class="metric-lbl">Audit trail</div></div>
+    </div>
+</div>
+
+<div class="pain-strip">
+    <div>You upload invoices manually</div>
+    <div>VAT errors cost you penalties</div>
+    <div>Reconciliation takes hours</div>
+    <div class="arrow">→</div>
+    <div class="solution">VatOps does it in seconds</div>
+</div>
+
+<!-- PREVIEW CARD -->
+<div class="preview-wrap">
+    <div class="preview">
+        <div class="preview-bar">
+            <span class="win-dot" style="background:#ff5f57"></span>
+            <span class="win-dot" style="background:#febc2e"></span>
+            <span class="win-dot" style="background:#28c840"></span>
+            <span class="preview-title">VatOps AI &middot; Review Queue</span>
+            <span class="preview-pill">&#9679; Mistral running</span>
+        </div>
+        <div class="preview-body">
+            <div class="preview-head">
+                <span>Invoice</span><span>Amount</span><span>Status</span>
+            </div>
+            <div class="inv-row">
+                <div><div class="inv-name">Tesco Stores Ltd</div><div class="inv-date">01/04/2026 &middot; Standard rated (20%)</div></div>
+                <div><div class="inv-amt">&pound;240.00</div><div class="inv-vat">VAT &pound;40.00</div></div>
+                <span class="inv-badge b-green">&#10003; Approved</span>
+            </div>
+            <div class="inv-row">
+                <div><div class="inv-name">Amazon EU SARL</div><div class="inv-date">02/04/2026 &middot; Standard rated (20%)</div></div>
+                <div><div class="inv-amt">&pound;89.99</div><div class="inv-vat">VAT &pound;15.00</div></div>
+                <span class="inv-badge b-amber">~ Pending</span>
+            </div>
+            <div class="inv-row">
+                <div><div class="inv-name">Office Depot UK</div><div class="inv-date">03/04/2026 &middot; Standard rated (20%)</div></div>
+                <div><div class="inv-amt">&pound;412.50</div><div class="inv-vat">VAT &pound;68.75</div></div>
+                <span class="inv-badge b-green">&#10003; Approved</span>
+            </div>
+            <div class="inv-row">
+                <div><div class="inv-name">BT Business</div><div class="inv-date">04/04/2026 &middot; VAT not detected</div></div>
+                <div><div class="inv-amt">&pound;135.00</div><div class="inv-vat">VAT &mdash;</div></div>
+                <span class="inv-badge b-red">&#10005; Review</span>
+            </div>
+        </div>
+        <div class="preview-stats">
+            <div class="ps-item"><div class="ps-val">4</div><div class="ps-lbl">Processed</div></div>
+            <div class="ps-item"><div class="ps-val">92%</div><div class="ps-lbl">Confidence</div></div>
+            <div class="ps-item"><div class="ps-val">43s</div><div class="ps-lbl">Total time</div></div>
+            <div class="ps-item"><div class="ps-val">100%</div><div class="ps-lbl">Audit trail</div></div>
+        </div>
+    </div>
+</div>
+
+<!-- FEATURES -->
+<section id="features" class="features-section">
+    <div class="features-inner">
+        <span class="sec-eyebrow">What VatOps does</span>
+        <div class="sec-title">Everything a UK finance team needs.<br>Nothing it doesn't.</div>
+        <div class="features-grid">
+            <div class="feat">
+                <div class="feat-title">AI extraction</div>
+                <div class="feat-desc">OCR + Mistral LLM extracts supplier, date, totals, VAT, and line items from any invoice format. Field-level confidence scoring flags uncertainty before review.</div>
+                <span class="feat-tag">&#8599; PaddleOCR &middot; Mistral 7B</span>
+            </div>
+            <div class="feat">
+                <div class="feat-title">UK VAT classification</div>
+                <div class="feat-desc">Applies HMRC rules automatically. Distinguishes missing VAT from zero-rated. Flags anomalies and mismatched totals before they become compliance issues.</div>
+                <span class="feat-tag">&#8599; HMRC MTD 2026</span>
+            </div>
+            <div class="feat">
+                <div class="feat-title">Bank reconciliation</div>
+                <div class="feat-desc">Upload bank CSV or Excel exports. Fuzzy-matches invoices to transactions with explainable scoring shows exactly why each match was chosen.</div>
+                <span class="feat-tag">&#8599; CSV &middot; XLSX &middot; XLS</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- STEPS -->
+<section id="how">
+    <div class="steps-section">
+        <span class="sec-eyebrow">How it works</span>
+        <div class="sec-title">Four steps.<br>Zero manual entry.</div>
+        <div class="steps-grid">
+            <div class="step"><div class="step-n">01</div><div class="step-title">Upload</div><div class="step-desc">Drop invoices in bulk. PDF, image, or text. VatOps handles the format.</div></div>
+            <div class="step"><div class="step-n">02</div><div class="step-title">Extract</div><div class="step-desc">AI reads every field with per-field confidence scoring and reasoning.</div></div>
+            <div class="step"><div class="step-n">03</div><div class="step-title">Review</div><div class="step-desc">Edit, approve, or reject. Missing VAT auto-calculates when you pick a rate.</div></div>
+            <div class="step"><div class="step-n">04</div><div class="step-title">Export</div><div class="step-desc">MTD CSV, Xero import, and exception report with full audit trail.</div></div>
+        </div>
+    </div>
+</section>
+
+<!-- BOTTOM CTA -->
+<div class="cta-section">
+    <div class="cta-title">Ready to process your first batch?</div>
+    <div class="cta-sub">No account needed &middot; Runs locally &middot; Your data never leaves your machine</div>
+    <a class="cta-btn" href="/app?go=start">
+        Start processing invoices &rarr;
+    </a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+    <span>VatOps AI &middot; Built by Mafooq &middot; 2026</span>
+    <div class="footer-links">
+        <a href="https://linkedin.com/in/-mafooq" target="_blank">LinkedIn</a>
+        <a href="https://github.com/s-mafooq/s-mafooq" target="_blank">GitHub</a>
+    </div>
+</footer>
+
+
+<script>
+document.addEventListener("mousemove", (e) => {
+    document.body.style.setProperty("--x", e.clientX + "px");
+    document.body.style.setProperty("--y", e.clientY + "px");
+});
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add("show");
+    });
+});
+document.querySelectorAll(".feat, .step").forEach(el => {
+    el.classList.add("hidden");
+    observer.observe(el);
+});
+</script>
+</body>
+</html>

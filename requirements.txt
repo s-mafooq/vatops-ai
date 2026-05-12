@@ -1,0 +1,16 @@
+fastapi
+uvicorn[standard]
+python-multipart
+pdfplumber
+pdf2image
+pillow
+pydantic
+rapidfuzz
+pandas
+ollama
+sqlalchemy
+openpyxl
+xlrd
+groq
+jinja2
+aiofiles

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VatOps AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="topnav">
+    <a href="/" class="nav-logo" style="text-decoration:none;color:inherit;">
+    <span class="nav-mark">V</span>
+    VatOps AI
+</a>
+    <div class="nav-links">
+        <button class="nav-btn active" data-view="upload">Upload</button>
+        <button class="nav-btn" data-view="review">Review <span class="pending-badge" id="pending-count" style="display:none"></span></button>
+        <button class="nav-btn" data-view="audit">Audit</button>
+    </div>
+    <div class="nav-right">
+        <span class="status-pill" id="model-status">● Mistral</span>
+        <a href="/" class="nav-home">← Home</a>
+    </div>
+</nav>
+
+<!-- VIEWS -->
+<main class="main-content">
+
+    <!-- UPLOAD VIEW -->
+    <div class="view active" id="view-upload">
+        <div class="view-header">
+            <h1 class="view-title">Upload Invoices</h1>
+            <p class="view-sub">Drop your invoices below — PDF, TXT, PNG, JPG, or JPEG.</p>
+        </div>
+
+        <div class="card" style="margin-bottom:1rem">
+            <div class="card-label">Bank Statement <span class="optional">optional</span></div>
+            <div class="drop-zone" id="bank-drop" data-type="bank">
+                <div class="drop-icon">🏦</div>
+                <div class="drop-title">Drop bank CSV or Excel here</div>
+                <div class="drop-hint">CSV · XLSX · XLS</div>
+                <input type="file" id="bank-input" accept=".csv,.xlsx,.xls" hidden>
+            </div>
+            <div class="bank-status" id="bank-status"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-label">Invoices</div>
+            <div class="drop-zone" id="invoice-drop" data-type="invoices">
+                <div class="drop-icon">📄</div>
+                <div class="drop-title">Drop invoice files here</div>
+                <div class="drop-hint">PDF · TXT · PNG · JPG · JPEG</div>
+                <input type="file" id="invoice-input" accept=".pdf,.txt,.png,.jpg,.jpeg" multiple hidden>
+            </div>
+            <div id="file-list" class="file-list"></div>
+        </div>
+
+        <div id="upload-actions" style="display:none;margin-top:1rem">
+            <button class="btn btn-primary" id="process-btn">
+                ⚡ Process Invoices
+            </button>
+        </div>
+
+        <div id="progress-wrap" style="display:none;margin-top:1rem">
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progress-fill"></div>
+            </div>
+            <div class="progress-label" id="progress-label">Processing...</div>
+        </div>
+
+        <div id="upload-results" style="display:none;margin-top:1.5rem"></div>
+    </div>
+
+    <!-- REVIEW VIEW -->
+    <div class="view" id="view-review">
+        <div class="view-header">
+            <h1 class="view-title">Review Queue</h1>
+            <p class="view-sub">Review, edit, and approve extracted invoices before export.</p>
+        </div>
+        <div id="metrics-row" class="metrics-row" style="display:none"></div>
+        <div id="review-list"></div>
+        <div id="export-bar" style="display:none" class="export-bar">
+            <div class="export-label">Export approved records</div>
+            <div class="export-btns">
+                <a class="btn btn-outline" href="/api/export/csv">⬇ MTD CSV</a>
+                <a class="btn btn-outline" href="/api/export/xero">⬇ Xero Import</a>
+                <a class="btn btn-outline" href="/api/export/exceptions">⬇ Exceptions</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- AUDIT VIEW -->
+    <div class="view" id="view-audit">
+        <div class="view-header">
+            <h1 class="view-title">Audit Trail</h1>
+            <p class="view-sub">Full history of all processed invoices.</p>
+        </div>
+        <div id="audit-stats" class="metrics-row"></div>
+        <div style="margin:1rem 0">
+            <a class="btn btn-outline" href="/api/audit/export">⬇ Download Audit CSV</a>
+        </div>
+        <div id="audit-list"></div>
+    </div>
+
+</main>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
