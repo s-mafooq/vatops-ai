@@ -589,8 +589,12 @@ function setupDragDrop(zone, onDrop) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    if (new URLSearchParams(window.location.search).get("go") === "start") {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("go") === "start") {
         switchView("upload");
+        window.history.replaceState({}, "", "/app");
+    } else if (params.get("view")) {
+        switchView(params.get("view"));
         window.history.replaceState({}, "", "/app");
     }
 });
