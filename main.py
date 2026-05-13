@@ -107,9 +107,13 @@ async def process_invoice(request: Request, file: UploadFile = File(...)):
 
         processing_time = round(time.time() - start, 2)
         audit_id = log_extraction(
-            filename=file.filename, extracted_data=invoice.model_dump(),
-            vat_category=vat_result.category, vat_flags=vat_result.flags,
-            confidence=invoice.confidence, processing_time=processing_time
+            filename=file.filename,
+            extracted_data=invoice.model_dump(),
+            vat_category=vat_result.category,
+            vat_flags=vat_result.flags,
+            confidence=invoice.confidence,
+            processing_time=processing_time,
+            session_id=session_id
         )
 
         result = {
@@ -205,12 +209,14 @@ async def export_exceptions(request: Request):
 
 # ── Audit log ─────────────────────────────────────────────────────────────────
 @app.get("/api/audit")
-async def audit_log():
-    return {"records": get_all_records(), "stats": get_summary_stats()}
+async def audit_log(request: Request):
+    session_id = request.cookies.get("vatops_session", "default")
+    return {"records": get_all_records(session_id), "stats": get_summary_stats(session_id)}
 
 @app.get("/api/audit/export")
-async def export_audit():
-    df = pd.DataFrame(get_all_records())
+async def export_audit(request: Request):
+    session_id = request.cookies.get("vatops_session", "default")
+    df = pd.DataFrame(get_all_records(session_id))
     data = df.to_csv(index=False).encode("utf-8")
     return StreamingResponse(io.BytesIO(data), media_type="text/csv",
         headers={"Content-Disposition": f"attachment; filename=audit_{datetime.now().strftime('%Y%m%d')}.csv"})
