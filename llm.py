@@ -9,8 +9,8 @@ USE_GEMINI = bool(GOOGLE_API_KEY)
 if USE_GEMINI:
     import google.generativeai as genai
     genai.configure(api_key=GOOGLE_API_KEY)
-    model = genai.GenerativeModel("gemini-1.5-flash")
-    print("LLM mode: Gemini 1.5 Flash (cloud)")
+    model = genai.GenerativeModel("gemini-2.0-flash")
+    print("LLM mode: Gemini 2.0 Flash (cloud)")
 else:
     import ollama
     print("LLM mode: Mistral (local Ollama)")
