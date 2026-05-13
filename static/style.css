@@ -532,11 +532,10 @@ body {
 .contact-avatar {
     width: 72px; height: 72px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #f5c842, #f08030);
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Syne', sans-serif;
-    font-size: 1.5rem; font-weight: 800; color: #000;
+    object-fit: cover;
+    display: block;
     margin: 0 auto 1rem;
+    border: 3px solid #f5c842;
 }
 .contact-name {
     font-family: 'Syne', sans-serif;
