@@ -1,8 +1,5 @@
 ﻿---
-title: VatOps AI
-emoji: 🧾
-colorFrom: yellow
-colorTo: red
+VatOps AI
 sdk: docker
 pinned: false
 ---
