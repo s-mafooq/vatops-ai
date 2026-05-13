@@ -14,7 +14,7 @@ if GROQ_API_KEY:
 elif GOOGLE_API_KEY:
     import google.generativeai as genai
     genai.configure(api_key=GOOGLE_API_KEY)
-    gemini = genai.GenerativeModel("gemini-1.5-flash-latest")
+    gemini = genai.GenerativeModel("gemini-2.0-flash-lite")
     MODE = "gemini"
     print("LLM mode: Gemini (cloud)")
 else:
