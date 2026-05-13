@@ -512,6 +512,68 @@ footer {
     border-bottom: 1px solid rgba(0,0,0,0.06) !important;
 }
 
+/* ── Mobile responsive ── */
+@media (max-width: 640px) {
+    nav {
+        padding: 0 1.25rem;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        height: auto;
+        min-height: 60px;
+        gap: 0.5rem;
+    }
+    .nav-logo { font-size: 0.9rem; flex-shrink: 0; }
+    .nav-links {
+        display: none;
+    }
+    .nav-cta {
+        margin-left: auto;
+        flex-shrink: 0;
+        font-size: 0.78rem;
+        padding: 7px 14px;
+        white-space: nowrap;
+    }
+
+    .hero {
+        padding: 80px 1.25rem 40px;
+        min-height: auto;
+    }
+    h1 { font-size: clamp(1.8rem, 8vw, 3rem); }
+    .sub { font-size: 0.9rem; }
+    .cta-btn { font-size: 0.9rem; padding: 13px 24px; width: 100%; justify-content: center; }
+
+    .metrics {
+        max-width: 100%;
+        grid-template-columns: repeat(2, 1fr);
+        display: grid;
+        border-radius: 12px;
+    }
+    .metric { border-right: none; border-bottom: 1px solid var(--border); }
+    .metric:nth-child(odd) { border-right: 1px solid var(--border); }
+    .metric:nth-last-child(-n+2) { border-bottom: none; }
+
+    .preview-wrap { padding: 0 1rem 3rem; }
+
+    .features-section { padding: 3rem 1.25rem; }
+    .features-grid { grid-template-columns: 1fr; gap: 1rem; }
+
+    .steps-section { padding: 3rem 1.25rem; }
+    .steps-grid { grid-template-columns: 1fr 1fr; }
+
+    .cta-section { margin: 0 1rem 3rem; padding: 2.5rem 1.25rem; }
+    .cta-title { font-size: 1.5rem; }
+
+    footer {
+        padding: 1.5rem 1.25rem;
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+        margin-left: 0;
+        transform: none;
+    }
+    .footer-links { justify-content: center; }
+}
+
 </style>
 </head>
 <body>
