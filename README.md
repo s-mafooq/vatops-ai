@@ -1,11 +1,11 @@
 ﻿Set-Content -Path D:\mtd-invoice-processor\README.md -Encoding UTF8 -Value @"
 ---
-title: VatOps AI
-emoji: 🧾
-colorFrom: yellow
-colorTo: red
-sdk: docker
-pinned: false
+title: {{VatOps AI}}
+emoji: {{🧾}}
+colorFrom: {{yellow}}
+colorTo: {{red}}
+sdk: {{docker}}
+pinned: {{false}}
 ---
 
 # VatOps AI
