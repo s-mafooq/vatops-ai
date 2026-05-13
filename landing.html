@@ -515,23 +515,25 @@ footer {
 /* ── Mobile responsive ── */
 @media (max-width: 640px) {
     nav {
-        padding: 0 1.25rem;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        height: auto;
-        min-height: 60px;
-        gap: 0.5rem;
+        padding: 0 1rem;
+        height: 56px;
+        gap: 0;
     }
-    .nav-logo { font-size: 0.9rem; flex-shrink: 0; }
-    .nav-links {
-        display: none;
+    .nav-logo { 
+        font-size: 0.85rem; 
+        flex-shrink: 0;
+        margin-right: 0;
+    }
+    .nav-links { 
+        display: none !important; 
     }
     .nav-cta {
         margin-left: auto;
         flex-shrink: 0;
         font-size: 0.78rem;
-        padding: 7px 14px;
+        padding: 8px 14px;
         white-space: nowrap;
+        border-radius: 8px;
     }
 
     .hero {
