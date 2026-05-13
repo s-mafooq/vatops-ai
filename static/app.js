@@ -567,8 +567,15 @@ function statusBadge(status) {
 function updatePendingBadge() {
     const count = state.records.filter(r => r.status === "pending").length;
     const badge = document.getElementById("pending-count");
-    if (count > 0) { badge.textContent = count; badge.style.display = "inline-flex"; }
-    else badge.style.display = "none";
+    const reviewBtn = document.querySelector('[data-view="review"]');
+    if (count > 0) {
+        badge.textContent = count;
+        badge.style.display = "inline-flex";
+        reviewBtn.classList.add("needs-action");
+    } else {
+        badge.style.display = "none";
+        reviewBtn.classList.remove("needs-action");
+    }
 }
 
 function setupDragDrop(zone, onDrop) {
