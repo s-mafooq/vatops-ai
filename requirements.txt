@@ -13,3 +13,4 @@ xlrd
 google-generativeai
 jinja2
 aiofiles
+groq
