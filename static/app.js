@@ -598,3 +598,13 @@ document.addEventListener("DOMContentLoaded", () => {
         window.history.replaceState({}, "", "/app");
     }
 });
+
+// Track key actions
+function trackEvent(action) {
+    gtag('event', action, { event_category: 'engagement' });
+}
+
+// Then call it at key moments
+trackEvent('invoice_uploaded');
+trackEvent('invoice_approved');
+trackEvent('csv_exported');
